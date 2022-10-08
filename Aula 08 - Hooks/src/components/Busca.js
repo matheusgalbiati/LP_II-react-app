@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { InputText } from "primereact/inputtext";
+import striptags from 'striptags'
+import { Button } from "primereact/button"
 
 const Busca = () => {
     const [termoDeBusca, setTermoDeBusca] = useState('React')
@@ -24,8 +26,19 @@ const Busca = () => {
             )
             setResultados(data.query.search)
         }
-        // chama a função
-        fazBusca()
+        if (termoDeBusca && !resultados.length){
+            fazBusca()
+        }
+        else {
+            const timeoutID = setTimeout(() => {
+                // execução condicional de novo
+                if (termoDeBusca)
+                    fazBusca()
+            }, 1000)
+            return () => {
+                clearTimeout(timeoutID)
+            }
+        }
     }, [termoDeBusca])
     return (
         <div>
@@ -45,10 +58,17 @@ const Busca = () => {
                         // borda, padding e ajuste textual
                             className="border-bottom border border-1 border-400 p-2 text-center font-bold">
                             {resultado.title}
+                            <span>
+                                <Button 
+                                    icon = "pi pi-send"
+                                    className = "ml-2 p-button-rounded p-button-secondary"
+                                    onClick = {() => window.open(`https://en.wikipedia.org?curid=${resultado.pageid}`)}
+                                />
+                            </span>
                         </div>
                         {/* padding */}
                         <div className="p-2">
-                            {resultado.snippet}
+                            {striptags(resultado.snippet)}
                         </div>
                     </div>
                 ))
